@@ -1,0 +1,45 @@
+services:
+  mongo-db:
+    container_name: mongo-container
+    image: mongo:5.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: testing
+      MONGO_INITDB_DATABASE: names
+    ports:
+      - 27018:27017
+    volumes:
+      - ./database:/data/db
+      - ./scripts-mongo/user.js:/docker-entrypoint-initdb.d/user.js:ro
+    networks:
+      - network-container
+
+  node:
+    container_name: node-container
+    build:
+      context: .
+      dockerfile: Node.Dockerfile
+    restart: unless-stopped
+    ports:
+      - 63342:63342
+    depends_on:
+      - mongo-db
+    networks:
+      - network-container
+
+  nginx:
+    container_name: nginx-container
+    build:
+      context: .
+      dockerfile: Api.Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8080:80
+    depends_on:
+      - node
+    networks:
+      - network-container
+
+networks:
+  network-container:

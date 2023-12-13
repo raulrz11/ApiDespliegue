@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>APINombres</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body style="background-color: #b3d4fc; margin: 0">
+<div style="display: flex; justify-content: center; align-items: center; background-color: cornflowerblue; color: white">
+  <h1>!SORTEO DESPLIEGUE!</h1>
+</div>
+<div style="display: flex; justify-content: center; align-items: center; text-align: center">
+  <form action="/names" method="post" style="margin: 15px 15px">
+    <label for="nombre" style="font-size: 25px; color: cornflowerblue">Ingrese su nombre</label><br><br>
+    <input type="text" id="nombre" name="nombre" placeholder="Nombre" required style="text-align: center"><br><br>
+    <input type="submit" value="Enviar" style="color: white; background-color: cornflowerblue;border: 2px solid white; padding: 5px">
+  </form>
+</div>
+<ul id="list"></ul>
+<script defer type="module">
+  async function getNames() {
+    return await fetch('http://localhost:63342/names').then(r => r.json())
+  }
+
+  async function renderNames() {
+    const names = await getNames()
+    const list = document.getElementById('list')
+    list.innerHTML = ''
+    names.forEach(name => {
+      const li = document.createElement('li')
+      li.innerText = name
+      list.appendChild(li)
+    })
+  }
+
+
+  await renderNames()
+
+  const form = document.querySelector('form')
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const data = new FormData(form)
+    const nombre = data.get('nombre')
+    await fetch('http://localhost:63342/names', {
+      method: 'POST',
+      body: JSON.stringify({nombre}),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    await renderNames()
+    form.reset()
+  })
+
+</script>
+</body>
+</html>
